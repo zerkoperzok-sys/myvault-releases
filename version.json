@@ -1,0 +1,11 @@
+{
+  "version": "1.1.0",
+  "notes": "Phase 1: Native notifications, Quick Add overlay, global shortcuts, daily auto-backup, tray airing info",
+  "files": {
+    "organizer.html": "https://raw.githubusercontent.com/zerkoperzok-sys/myvault-releases/main/organizer.html",
+    "main.js": "https://raw.githubusercontent.com/zerkoperzok-sys/myvault-releases/main/main.js",
+    "preload.js": "https://raw.githubusercontent.com/zerkoperzok-sys/myvault-releases/main/preload.js",
+    "preload-quickadd.js": "https://raw.githubusercontent.com/zerkoperzok-sys/myvault-releases/main/preload-quickadd.js",
+    "quick-add.html": "https://raw.githubusercontent.com/zerkoperzok-sys/myvault-releases/main/quick-add.html"
+  }
+}

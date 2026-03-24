@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Quick Add</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: rgba(13, 13, 24, 0.96);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 16px;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    -webkit-app-region: no-drag;
+  }
+
+  /* Drag bar */
+  .drag-bar {
+    height: 36px;
+    background: rgba(229,9,20,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    -webkit-app-region: drag;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .drag-bar-icon { font-size: 0.85rem; }
+  .drag-bar-title { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; flex: 1; }
+  .drag-bar-close {
+    -webkit-app-region: no-drag;
+    background: none; border: none; color: rgba(255,255,255,0.3);
+    font-size: 1rem; cursor: pointer; padding: 2px 4px; border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .drag-bar-close:hover { color: #e50914; background: rgba(229,9,20,0.15); }
+
+  .content { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Search input */
+  .search-wrap {
+    position: relative;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .search-icon { font-size: 0.9rem; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+  input#qa-input {
+    flex: 1; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; padding: 10px 14px;
+    color: #fff; font-size: 0.92rem;
+    font-family: inherit; outline: none;
+    transition: border-color 0.15s;
+  }
+  input#qa-input:focus { border-color: rgba(229,9,20,0.5); }
+  input#qa-input::placeholder { color: rgba(255,255,255,0.25); }
+
+  /* Results */
+  #qa-results {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;
+    max-height: 320px;
+  }
+  #qa-results::-webkit-scrollbar { width: 4px; }
+  #qa-results::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  .qa-result {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; transition: background 0.12s;
+    border: 1px solid transparent;
+  }
+  .qa-result:hover, .qa-result.selected {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.08);
+  }
+  .qa-result.selected { border-color: rgba(229,9,20,0.3); background: rgba(229,9,20,0.08); }
+  .qa-result img {
+    width: 32px; height: 44px; object-fit: cover;
+    border-radius: 5px; flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+  }
+  .qa-result-info { flex: 1; min-width: 0; }
+  .qa-result-title { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qa-result-meta { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .qa-result-add {
+    background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.3);
+    color: #e50914; border-radius: 6px; padding: 4px 10px;
+    font-size: 0.72rem; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: background 0.12s; flex-shrink: 0;
+  }
+  .qa-result-add:hover { background: rgba(229,9,20,0.28); }
+  .qa-result-add.added { background: rgba(6,214,160,0.12); border-color: rgba(6,214,160,0.3); color: #06d6a0; }
+
+  /* Status line */
+  #qa-status {
+    font-size: 0.7rem; color: rgba(255,255,255,0.3);
+    text-align: center; padding: 4px 0;
+    min-height: 20px;
+  }
+
+  /* Hint bar */
+  .hint-bar {
+    display: flex; gap: 12px; justify-content: center;
+    padding: 8px 14px; border-top: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.65rem; color: rgba(255,255,255,0.25);
+    flex-shrink: 0;
+  }
+  .hint-bar kbd {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 3px; padding: 1px 5px; font-family: inherit;
+  }
+</style>
+</head>
+<body>
+<div class="drag-bar">
+  <span class="drag-bar-icon">⚡</span>
+  <span class="drag-bar-title">Quick Add Anime</span>
+  <button class="drag-bar-close" onclick="window.quickAdd.close()">✕</button>
+</div>
+
+<div class="content">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="qa-input" type="text" placeholder="Search AniList… (e.g. Attack on Titan)" autofocus>
+  </div>
+  <div id="qa-status">Type to search AniList</div>
+  <div id="qa-results"></div>
+</div>
+
+<div class="hint-bar">
+  <span><kbd>↑↓</kbd> navigate</span>
+  <span><kbd>Enter</kbd> add</span>
+  <span><kbd>Esc</kbd> close</span>
+</div>
+
+<script>
+  const input    = document.getElementById('qa-input');
+  const results  = document.getElementById('qa-results');
+  const status   = document.getElementById('qa-status');
+
+  let _debounce  = null;
+  let _items     = [];
+  let _selected  = -1;
+  let _added     = new Set();
+
+  input.addEventListener('input', () => {
+    clearTimeout(_debounce);
+    const q = input.value.trim();
+    if (!q) { results.innerHTML = ''; status.textContent = 'Type to search AniList'; return; }
+    status.textContent = 'Searching…';
+    _debounce = setTimeout(() => searchAniList(q), 380);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { window.quickAdd.close(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSelect(1); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); moveSelect(-1); }
+    if (e.key === 'Enter' && _selected >= 0) {
+      e.preventDefault();
+      addAnime(_items[_selected]);
+    }
+  });
+
+  function moveSelect(dir) {
+    _selected = Math.max(0, Math.min(_items.length-1, _selected + dir));
+    renderResults();
+    const el = results.querySelector('.qa-result.selected');
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  }
+
+  async function searchAniList(q) {
+    try {
+      const gql = `query($s:String){Page(perPage:8){media(search:$s,type:ANIME,sort:POPULARITY_DESC){
+        id title{romaji english} coverImage{medium large extraLarge} episodes status genres
+      }}}`;
+      const resp = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: gql, variables: { s: q } })
+      });
+      const json = await resp.json();
+      _items = json.data.Page.media || [];
+      _selected = _items.length > 0 ? 0 : -1;
+      status.textContent = _items.length ? `${_items.length} results — press Enter to add` : 'No results found';
+      renderResults();
+    } catch(e) {
+      status.textContent = 'Could not reach AniList';
+    }
+  }
+
+  function renderResults() {
+    results.innerHTML = _items.map((m, i) => {
+      const title = m.title.english || m.title.romaji;
+      const meta  = [m.status, m.episodes ? m.episodes+' eps' : '', (m.genres||[]).slice(0,2).join(', ')].filter(Boolean).join(' · ');
+      const isAdded = _added.has(m.id);
+      return `<div class="qa-result${i===_selected?' selected':''}" onclick="addAnime(_items[${i}])">
+        <img src="${m.coverImage.medium}" alt="" onerror="this.style.display='none'">
+        <div class="qa-result-info">
+          <div class="qa-result-title">${escHtml(title)}</div>
+          <div class="qa-result-meta">${escHtml(meta)}</div>
+        </div>
+        <button class="qa-result-add${isAdded?' added':''}" onclick="event.stopPropagation();addAnime(_items[${i}])">
+          ${isAdded ? '✓ Added' : '+ Add'}
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  async function addAnime(item) {
+    if (!item || _added.has(item.id)) return;
+    _added.add(item.id);
+
+    const title       = item.title.english || item.title.romaji;
+    const coverUrl    = item.coverImage.extraLarge || item.coverImage.large;
+    const anilistId   = item.id;
+    const episodes    = item.episodes || null;
+    const genres      = item.genres || [];
+
+    status.textContent = `Adding ${title}…`;
+
+    // Send to main app
+    await window.quickAdd.addAnime({
+      title, coverUrl, anilistId, episodes, genres,
+      animeStatus: 'later'
+    });
+
+    status.textContent = `✅ Added ${title}!`;
+    renderResults();
+
+    // Clear after short delay
+    setTimeout(() => {
+      status.textContent = 'Added! Search for another…';
+    }, 1500);
+  }
+
+  function escHtml(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Focus input when window shows
+  window.addEventListener('focus', () => input.focus());
+  input.focus();
+</script>
+</body>
+</html>
